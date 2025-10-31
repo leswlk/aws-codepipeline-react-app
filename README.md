@@ -128,6 +128,7 @@ Finish up S3 Bucket configuration
     - On the top bar, choose "Properties"
 
 ![Image](./images/bucketproperties.jpg)
+
 - Scroll down to "Static Website Hosting" and click "Edit"
 
 ![Image](./images/staticwebsitehosting.jpg)
@@ -136,6 +137,17 @@ Finish up S3 Bucket configuration
 
 ![Image](./images/statichostingwebsite2.jpg)
 - Next, edit some permissions, while still on the top bar choose "Permissions"
+
+![Image](./images/bucketproperties.jpg)
+
+- Scroll down to "Static Website Hosting" and click "Edit"
+
+![Image](./images/staticwebsitehosting.jpg)
+- Under "Static Website Hosting", choose "Enable"
+- And specify `index.html` as the index document, then click "Save"
+
+![Image](./images/statichostingwebsite2.jpg)
+- Next, edit some permissions, still on the tob bar choose "Permissions"
 - Uncheck "Block all public access" to allow public access, then click "Save changes"
 
 ![Image](./images/publicaccesssettings.jpg)
