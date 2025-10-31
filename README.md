@@ -33,7 +33,7 @@ For the deploy provider we are going to use Amazon S3, we will create an S3 buck
 2.  Click Create bucket.
 3.  Name it something unique like `demo-react-cicd-bucket`
 
-[![Image](./images/bucketcreation.jpg)
+![Image](./images/bucketcreation.jpg)
 
 Once the s3 bucket is created, leave it for now, as we will come for it to finish the setup later.
 
@@ -46,7 +46,7 @@ Now the fun part---building the pipeline.
 2.  Name your pipeline: `aws-codepipeline-react-app-demo`
 3.  Choose a new service role or an existing one.
 
-[![Image](./images/pipelinecreation.jpg)
+![Image](./images/pipelinecreation.jpg)
 
 4.  Add source stage:\
     - Source provider: GitHub (connect your GitHub account).\
@@ -55,7 +55,7 @@ Now the fun part---building the pipeline.
 Note: Make sure you select the repository that we cloned in Step 1
 Once you are connected to your Github and select your repository, then choose "Next"
 
-[![Image](./images/sourcestagecreation.jpg)
+![Image](./images/sourcestagecreation.jpg)
 
 5.  Add build stage:\
     - Provider: AWS CodeBuild.\
@@ -71,7 +71,7 @@ Now let's set up CodeBuild, which will handle building the React app.
 1.  Go to CodeBuild, click Create Build Project.
 2.  Give it a name, something fuego!
 
-[![Image](./images/buildprojectcreation.jpg)
+![Image](./images/buildprojectcreation.jpg)
 
 3.  Choose a managed image: aws/codebuild/standard:6.0 (or latest).
 4.  Under build specifications, choose "Use a buildspec file"
@@ -106,14 +106,14 @@ Note: This file tells CodeBuild to install dependencies, build the app, and copy
 1.  Back to the CodeBuild Project, keep the rest as default and choose "Continue to CodePipeline"
 2.  Then the CodeBuild project will be create and added to the build stage as shown below, then choose "Next"
 
-[![Image](./images/buildprojectcreation2.jpg)
+![Image](./images/buildprojectcreation2.jpg)
 
 1.  Add deploy stage:\
     - Provider: Amazon S3.\
     - Bucket: Select the one you created earlier `my-react-cicd-demo`\
     - Extract file option: YES, choose "Next"
 
-[![Image](./images/deploystagecreation.jpg)\
+![Image](./images/deploystagecreation.jpg)\
 - Lastly, review all the configuration and click "Create pipeline"
 
 Once the pipeline is successfully created, you'll see it run through the `source` `build` and `deploy` stages.
@@ -127,14 +127,14 @@ Finish up S3 Bucket configuration
 4.  Now let's make this S3 Bucket public:\
     - On the top bar, choose "Properties"
 
-[![Image](./images/bucketproperties.jpg)\
+![Image](./images/bucketproperties.jpg)\
 - Scroll down to "Static Website Hosting" and click "Edit"
 
-[![Image](./images/staticwebsitehosting.jpg)\
+![Image](./images/staticwebsitehosting.jpg)\
 - Under "Static Website Hosting", choose "Enable"\
 - And specify `index.html` as the index document, then click "Save"
 
-![Screenshot](./images/statichostingwebsite2.jpg)\
+![Image](./images/statichostingwebsite2.jpg)\
 - Next, edit some permissions, still on the tob bar choose "Permissions"\
 - Uncheck "Block all public access" to allow public access, then click "Save changes"
 
