@@ -1,0 +1,68 @@
+version: 0.2
+
+env:
+  variables:
+    NODE_ENV: "production"
+    # Hardening: Pinning tool versions to prevent software supply chain poisoning
+    SEMGREP_VERSION: "1.65.0" 
+    GITLEAKS_VERSION: "8.18.2"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18 # Hardening: Pinning the runtime version for reproducibility
+    commands:
+      # 1. Install GitLeaks directly from binary to prevent tampering
+      - echo "Installing GitLeaks secret scanner..."
+      - wget https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
+      - tar -xzf gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz gitleaks
+      - mv gitleaks /usr/local/bin/
+      
+      # 2. Install Semgrep via pip securely
+      - echo "Installing Semgrep static analysis engine..."
+      - pip3 install semgrep==${SEMGREP_VERSION}
+
+  pre_build:
+    commands:
+      - echo "Entering Pre-Build Security Verification Phase..."
+
+      # GATE 1: Hardened Secret Scanning
+      # Hardening: Run GitLeaks to detect hardcoded high-entropy tokens.
+      # If a token is committed, CodeBuild terminates the build immediately before compilation.
+      - echo "Executing GitLeaks Secret Scan..."
+      - gitleaks detect --verbose --redact
+
+      # GATE 2: Software Supply Chain / Dependency Auditing
+      # Hardening: Enforce checking for production dependency vulnerabilities.
+      # '--audit-level=high' means the pipeline tolerates low/medium risks but aggressively breaks on high/critical flaws.
+      - echo "Auditing production dependencies with npm audit..."
+      - npm audit --production --audit-level=high
+
+      # GATE 3: Static Application Security Testing (SAST)
+      # Hardening: Scan code against verified OWASP/CWE rulesets using Semgrep.
+      # The '--error' flag forces the pipeline to return a non-zero exit code if vulnerabilities match your rule constraints.
+      - echo "Executing Semgrep SAST scan..."
+      - semgrep scan --config=p2/r/security-codecheck --error
+
+  build:
+    commands:
+      - echo "Security gates passed. Initiating production compilation..."
+      # Hardening: Using 'npm ci' (Clean Install) instead of 'npm install'.
+      # 'npm ci' strictly enforces the exact dependency tree listed in your lockfile, 
+      # preventing malicious dependency hijacking or drift during build execution.
+      - npm ci
+      - npm run build
+
+  post_build:
+    commands:
+      - echo "Build phase complete. Securing distribution artifacts..."
+      # Hardening: Generating an automated Software Bill of Materials (SBOM) metadata inventory
+      # highly looked for in Software Supply Chain Security roles.
+      - npm list --json > sbom.json
+      - echo "Build successfully completed on $(date)"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: build
+  name: secured-react-app-production-artifact
