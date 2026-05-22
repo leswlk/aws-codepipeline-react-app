@@ -28,3 +28,40 @@ The continuous delivery cycle enforces three sequential, automated security gate
 ### Gate 3: Static Application Security Testing (Semgrep SAST)
 * **Why it was chosen:** While dependency scanning protects against third-party risk, SAST actively inspects the proprietary application code written by the developer. It identifies custom programming flaws like Cross-Site Scripting (XSS), insecure configuration variables, or broken client-side access logic before compilation.
 * **Risk Threshold:** **CWE / OWASP Top 10 Policy Failures.** Executing with the `--error` flag, the Semgrep engine parses code against pre-configured security rulesets (`p2/r/security-codecheck`). Any code pattern matching a validated security rule breaks the build path cleanly, forcing developer remediation prior to distribution.
+
+---
+
+## 🛡️ Supply Chain Hardening: Why `npm ci` over `npm install`
+
+Traditional deployment guides frequently utilize standard `npm install` within build scripts. In an enterprise-grade DevSecOps architecture, this introduces severe **Software Supply Chain Risk**. 
+
+This pipeline strictly mandates **`npm ci` (Clean Install)** for production artifact compilation due to three core engineering requirements:
+
+1. **Strict Lockfile Enforcement:** `npm install` can dynamically update patch versions of packages on the fly if the `package.json` file uses relaxed semver positioning (e.g., `^` or `~`). Conversely, `npm ci` strictly enforces the absolute, exact dependency versions recorded in the `package-lock.json` file. If there is even a minor discrepancy between the manifest and the lockfile, the build fails immediately.
+2. **Deterministic, Reproducible Builds:** Because `npm ci` removes existing `node_modules` folders entirely and installs a pristine copy of the pinned dependency graph, it completely eliminates the risk of "configuration drift" or environment-specific dependencies across local developer environments and cloud build environments.
+3. **Prevention of Malicious Package Hijacking:** If a dependency has been compromised or a malicious actor pushes a poisoned patch version to a public package registry, a standard `npm install` script might pull that compromised version into production automatically. `npm ci` guarantees that the pipeline compiles *exclusively* the precise code blocks that were peer-reviewed, tested, and approved during the initial commit cycle.
+
+---
+
+## 🚀 How to Execute This Pipeline
+
+Because the infrastructure is designed to be entirely modular and environment-agnostic, you can validate the pipeline configuration locally or deploy it to your own cloud instance.
+
+### Prerequisites & Dependencies
+Ensure the following tools are available on your local system or built into your custom AWS CodeBuild environment:
+* **Node.js** (v18.x recommended) & **npm**
+* **AWS CLI** configured with appropriate deployment permissions
+* **Git** installed locally
+
+### Local "Pre-Flight" Security Validation
+To execute the exact security verification gates locally without spinning up AWS resources, ensure you have the native binaries installed and execute the following commands in your workspace root:
+
+```bash
+# 1. Execute local secret detection
+gitleaks detect --verbose
+
+# 2. Execute local production dependency audit
+npm audit --production --audit-level=high
+
+# 3. Execute local static analysis scan
+semgrep scan --config=p2/r/security-codecheck --error
