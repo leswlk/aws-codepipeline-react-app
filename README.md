@@ -53,6 +53,7 @@ git clone https://github.com/leswlk/saas-landing-page.git
 #### ➡️ Step 2 - Create S3 Bucket for Hosting
 We will use Amazon S3 as our deploy provider.
 1. Head over to the Amazon S3 console and click **Create bucket**.
+![Bucket Properties(images/bucketproperties.jpg)
 2. Name it something unique (e.g., `demo-react-cicd-bucket`) and select your AWS Region.
 Leave the bucket for now; we will configure it for public hosting later.
 
