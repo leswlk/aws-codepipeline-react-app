@@ -55,7 +55,7 @@ We will use Amazon S3 as our deploy provider.
 1. Head over to the Amazon S3 console and click **Create bucket**.
 2. Name it something unique (e.g., `demo-react-cicd-bucket`) and select your AWS Region.
 Leave the bucket for now; we will configure it for public hosting later.
-    ![Bucket Creation](images/bucketcreation.jpg)
+![Bucket Creation](images/bucketcreation.jpg)
 
 #### ➡️ Step 3 - Create CodePipeline
 1. Go to AWS CodePipeline and click **Create pipeline**.
@@ -63,13 +63,13 @@ Leave the bucket for now; we will configure it for public hosting later.
 3. **Add source stage**:
     *   Choose **GitHub (via GitHub App)** as the source provider and connect your account.
     *   Select your repository (e.g., `leswlk/saas-landing-page`) and set the default branch to `main`.
-        ![Pipeline Creation](images/pipelinecreation.jpg)
-        ![Source Stage](images/sourcestagecreation.jpg)
+![Pipeline Creation](images/pipelinecreation.jpg)
+![Source Stage](images/sourcestagecreation.jpg)
 
 #### ➡️ Step 4 - Create CodeBuild Project
 1. In the **Add build stage**, select **AWS CodeBuild** as the provider and click **Create project**.
 2. Name the project (e.g., `fuego-cicd-codepipeline-demo`).
-    ![Build Project](images/buildprojectcreation.jpg)
+![Build Project](images/buildprojectcreation.jpg)
 3. Choose a managed image: `aws/codebuild/standard:6.0` (or latest) and select "Use a buildspec file".
 4. In your GitHub repo's root directory, create a `buildspec.yml` file:
 ```yaml
@@ -95,23 +95,23 @@ artifacts:
   discard-paths: no
 ```
 *Note: This utilizes our mandated `npm ci` command to ensure build determinism and copies the build folder contents as artifacts.*
-    ![Build Project Creation 2](images/buildprojectcreation2.jpg)
+![Build Project Creation 2](images/buildprojectcreation2.jpg)
 5. Return to CodePipeline and proceed to the **Add deploy stage**.
 6. Select **Amazon S3** as the deploy provider, choose your newly created bucket (`demo-react-cicd-bucket`), and **crucially**, check the box for **Extract file before deploy**.
-    ![Deploy Stage Creation](images/deploystagecreation.jpg)
+![Deploy Stage Creation](images/deploystagecreation.jpg)
 7. Review and click **Create pipeline**. You will see the pipeline execute successfully through the source, build, and deploy stages.
-    ![Pipeline Test](images/pipelinetest.jpg)
+![Pipeline Test](images/pipelinetest.jpg)
 
 #### ➡️ Step 5 - Finish up S3 Bucket configuration
 1. Go to the Amazon S3 console, select your bucket, and navigate to the **Properties** tab.
-    ![Bucket Properties](images/bucketproperties.jpg)
+![Bucket Properties](images/bucketproperties.jpg)
 2. Scroll down to **Static website hosting**, click **Edit**, and choose **Enable**.
-    ![Static Hosting Website](images/statichostingwebsite.jpg)
+![Static Hosting Website](images/staticwebsitehosting.jpg)
 3. Specify `index.html` as the index document and click **Save**.
-    ![Static Hosting Website Enabled](images/statichostingwebsite2.jpg)
+![Static Hosting Website Enabled](images/statichostingwebsite2.jpg)
 4. Switch to the **Permissions** tab and click **Edit** under **Block public access (bucket settings)**.
 5. Uncheck **Block all public access** and click **Save changes**.
-    ![Public Access Settings](images/publicaccesssettings.jpg)
+![Public Access Settings](images/publicaccesssettings.jpg)
 6. Add the following Bucket Policy to allow public read access (replace with your exact bucket name):
 ```json
 {
@@ -128,7 +128,16 @@ artifacts:
 }
 ```
 7. Finally, under the **Objects** tab, click on `index.html` and follow the **Object URL** to view your live React application!
-    ![Index](images/index.jpg)
+![Index](images/index.jpg)
+![Index2](images/index2.jpg)
+
+Now that the entire pipeline is up and running, let's test it with a real-world scenario. Say a junior developer decided to play a prank on the rest of the team before publishing the page because they were hungry for some lemon pepper wings, adding it as a feature to the pricing tier. Once they push this change to the main branch on GitHub, CodePipeline automatically detects the change, triggers the build, and deploys the "prank" version to the live S3 site.
+
+![Junior Dev Prank](images/pipelinetest2.jpg)
+
+Fortunately, a senior developer or manager would notice this unauthorized change. To fix it, they simply revert the commit locally and push the correctionback to GitHub. The pipeline immediately triggers again, running through the source, build, and deploy stages to automatically restore the correct production version without any manual server intervention.
+
+![Junior Dev Prank](images/pipelinetest3.jpg)
 
 ---
 
