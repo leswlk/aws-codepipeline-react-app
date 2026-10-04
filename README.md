@@ -133,11 +133,11 @@ artifacts:
 
 Now that the entire pipeline is up and running, let's test it with a real-world scenario. Say a junior developer decided to play a prank on the rest of the team before publishing the page because they were hungry for some lemon pepper wings, adding it as a feature to the pricing tier. Once they push this change to the main branch on GitHub, CodePipeline automatically detects the change, triggers the build, and deploys the "prank" version to the live S3 site.
 
-![Junior Dev Prank](images/pipelinetest2.jpg)
+![Junior Dev Prank](images/pipelinetest3.jpg)
 
 Fortunately, a senior developer or manager would notice this unauthorized change. To fix it, they simply revert the commit locally and push the correctionback to GitHub. The pipeline immediately triggers again, running through the source, build, and deploy stages to automatically restore the correct production version without any manual server intervention.
 
-![Junior Dev Prank](images/pipelinetest3.jpg)
+![Junior Dev Prank](images/pipelinetest2.jpg)
 
 ---
 
